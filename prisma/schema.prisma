@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum StatusAgendamento {
+  PENDENTE
+  CONFIRMADO
+  CONCLUIDO
+}
+
+model Cliente {
+  id            Int           @id @default(autoincrement())
+  nome          String
+  telefone      String
+  criadoEm      DateTime      @default(now())
+  agendamentos  Agendamento[]
+}
+
+model Servico {
+  id            Int           @id @default(autoincrement())
+  nome          String
+  preco         Decimal       @db.Decimal(10, 2)
+  duracao       Int
+  agendamentos  Agendamento[]
+}
+
+model Barbeiro {
+  id             Int           @id @default(autoincrement())
+  nome           String
+  especialidade  String        @default("Geral")
+  inicio         String        @default("09:00")
+  fim            String        @default("18:00")
+  ativo          Boolean       @default(true)
+  agendamentos   Agendamento[]
+}
+
+model Agendamento {
+  id          Int                @id @default(autoincrement())
+  data        DateTime
+  status      StatusAgendamento  @default(PENDENTE)
+  clienteId   Int
+  servicoId   Int
+  barbeiroId  Int
+  cliente     Cliente            @relation(fields: [clienteId], references: [id])
+  servico     Servico            @relation(fields: [servicoId], references: [id])
+  barbeiro    Barbeiro           @relation(fields: [barbeiroId], references: [id])
+}
+
+model Plano {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  descricao   String   @default("Sem descrição")
+  preco       Decimal  @db.Decimal(10, 2)
+  assinantes  Int      @default(0)
+  ativo       Boolean  @default(true)
+}
